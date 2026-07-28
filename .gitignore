@@ -1,0 +1,32 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Dependency directories
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build outputs
+dist/
+client/dist/
+server/dist/
+build/
+coverage/
+
+# Uploads & temporary media
+server/uploads/*
+!server/uploads/.gitkeep
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+*.log
+.cache/
+.tmp/
+.temp/
+
+# Internal Agent customizations
+.agents/

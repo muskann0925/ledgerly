@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --background: 210 40% 98%; /* #F8FAFC */
+    --foreground: 222 47% 11%; /* #111827 */
+
+    --card: 0 0% 100%; /* Pure white #FFFFFF */
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 24 95% 53%; /* #F97316 (Orange 500) */
+    --primary-hover: 21 90% 48%; /* #EA580C */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%; /* #6B7280 */
+
+    --accent: 24 95% 96%;
+    --accent-foreground: 24 95% 53%;
+
+    --destructive: 0 84.2% 60.2%; /* #DC2626 */
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 76% 36%; /* #16A34A */
+    --warning: 38 92% 50%; /* #F59E0B */
+
+    --border: 214.3 31.8% 91.4%; /* Crisp Slate 200 #E2E8F0 */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 24 95% 53%;
+
+    --radius: 1rem; /* rounded-2xl */
+  }
+
+  .dark {
+    --background: 222 47% 7%; /* #090D16 */
+    --foreground: 210 40% 98%; /* #F9FAFB */
+
+    --card: 222 47% 11%; /* #111827 */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 24 95% 53%; /* #F97316 */
+    --primary-hover: 21 90% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%; /* #9CA3AF */
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%; /* #1F2937 */
+    --input: 217.2 32.6% 17.5%;
+    --ring: 24 95% 53%;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #F8FAFC;
+    color: #111827;
+  }
+
+  .dark body {
+    background-color: #090D16;
+    color: #F9FAFB;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.65);
+}
+
+/* Primary Button Styling */
+.btn-primary {
+  background-color: #F97316;
+  color: #FFFFFF;
+  border-radius: 0.75rem; /* rounded-xl */
+  height: 40px;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-weight: 500;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #EA580C;
+}
+
+/* Secondary Button Styling */
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: #374151;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.75rem; /* rounded-xl */
+  height: 40px;
+  padding-left: 16px;
+  padding-right: 16px;
+  font-weight: 500;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.dark .btn-secondary {
+  background-color: #1F2937;
+  color: #F3F4F6;
+  border-color: #374151;
+}
+
+.btn-secondary:hover {
+  background-color: #F9FAFB;
+}
+
+.dark .btn-secondary:hover {
+  background-color: #374151;
+}
+
+/* Global Dark Mode Form & Control Fixes */
+.dark {
+  color-scheme: dark;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  color: #F9FAFB;
+  background-color: #111827;
+}
+
+.dark select option {
+  background-color: #111827;
+  color: #F9FAFB;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9CA3AF;
+}
+
+.dark input:disabled,
+.dark textarea:disabled,
+.dark select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Chrome/Safari Autofill styling in Dark Mode */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover, 
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark select:-webkit-autofill {
+  -webkit-text-fill-color: #F9FAFB !important;
+  -webkit-box-shadow: 0 0 0px 1000px #111827 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Professional Print Stylesheet */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide Application Shell & Non-Printable Elements */
+  header,
+  nav,
+  aside,
+  .sidebar,
+  .no-print,
+  button:not(.print-keep),
+  input:not(.print-keep),
+  select,
+  .sticky,
+  [role="dialog"] > div > div:first-child,
+  [role="menu"] {
+    display: none !important;
+  }
+
+  /* Force Print Area Full Width */
+  .printable-area {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Page Break Helpers */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+}
+
+

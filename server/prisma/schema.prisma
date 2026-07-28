@@ -1,0 +1,626 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  SALES
+  FINANCE
+  VIEWER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  SENT
+  VIEWED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+enum ClientType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum NotificationType {
+  INVOICE_SENT
+  INVOICE_VIEWED
+  PAYMENT_RECEIVED
+  INVOICE_OVERDUE
+  REMINDER_SENT
+  QUOTATION_APPROVED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String
+  phone         String?
+  profileImage  String?
+  role          Role           @default(SALES)
+  department    String?
+  isActive      Boolean        @default(true)
+  lastLoginAt   DateTime?
+  emailVerified Boolean        @default(false)
+  createdBy     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  twoFactorEnabled    Boolean              @default(false)
+  passwordResetTokens PasswordResetToken[]
+  emailOtps           EmailOtp[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+}
+
+model PasswordResetToken {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hashedToken String   @unique
+  expiresAt   DateTime
+  used        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([hashedToken])
+  @@index([expiresAt])
+}
+
+model EmailOtp {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hashedOtp String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([hashedOtp])
+  @@index([expiresAt])
+}
+
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  title      String
+  message    String
+  entityType String
+  entityId   String
+  metadata   Json             @default("{}")
+  isRead     Boolean          @default(false)
+  createdAt  DateTime         @default(now())
+  readAt     DateTime?
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([userId, isRead])
+  @@index([entityType, entityId])
+}
+
+model Client {
+  id              String           @id @default(cuid())
+  companyName     String
+  clientType      ClientType       @default(BUSINESS)
+  contactPerson   String
+  email           String           @unique
+  phone           String
+  gstNumber       String?          @unique
+  panNumber       String?
+  billingAddress  String?
+  shippingAddress String?
+  state           String?
+  status          ClientStatus     @default(ACTIVE)
+  notes           String?
+  isDeleted       Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  invoices        Invoice[]
+  documents       ClientDocument[]
+  activities      ClientActivity[]
+  quotations      Quotation[]
+  creditNotes     CreditNote[]
+
+  @@index([status])
+  @@index([isDeleted])
+  @@index([createdAt])
+}
+
+model ClientDocument {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title     String
+  fileUrl   String
+  fileType  String
+  fileSize  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClientActivity {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  action      String
+  description String
+  performedBy String
+  createdAt   DateTime @default(now())
+}
+
+model Invoice {
+  id                String        @id @default(cuid())
+  number            String        @unique
+  clientId          String
+  client            Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  issueDate         DateTime      @default(now())
+  dueDate           DateTime
+  status            InvoiceStatus @default(DRAFT)
+  currency          String        @default("INR")
+  subtotal          Float         @default(0)
+  discount          Float         @default(0)
+  tax               Float         @default(0)
+  totalAdditiveTax  Float         @default(0)
+  totalDeductionTax Float         @default(0)
+  grandTotal        Float         @default(0)
+  netPayable        Float         @default(0)
+  total             Float         @default(0)
+  amountPaid        Float         @default(0)
+  balanceDue        Float         @default(0)
+  notes             String?
+  terms             String?
+  createdBy         String?
+  isDeleted         Boolean       @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  items             InvoiceItem[]
+  payments          Payment[]
+  creditNotes       CreditNote[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([createdAt])
+  @@index([isDeleted])
+  @@index([clientId, status])
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Float    @default(1)
+  unitPrice   Float    @default(0)
+  lineAmount  Float    @default(0)
+  taxRate     Float    @default(0)
+  discount    Float    @default(0)
+  appliedTaxes Json    @default("[]")
+  total       Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_CARD
+  CHEQUE
+  OTHER
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount          Float
+  paymentDate     DateTime      @default(now())
+  paymentMethod   PaymentMethod @default(CASH)
+  referenceNumber String?
+  notes           String?
+  createdBy       String?
+  isDeleted       Boolean       @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now()) @updatedAt
+
+  @@index([invoiceId])
+  @@index([paymentDate])
+  @@index([isDeleted])
+  @@index([paymentMethod])
+}
+
+enum ExpenseStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum ExpensePaymentMethod {
+  CASH
+  UPI
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_CARD
+  CHEQUE
+  OTHER
+}
+
+enum CreditNoteStatus {
+  ISSUED
+  APPLIED
+  VOIDED
+}
+
+model ExpenseCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  color       String?
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  expenses    Expense[]
+
+  @@index([name])
+  @@index([isDeleted])
+}
+
+model Vendor {
+  id          String    @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  gstNumber   String?
+  panNumber   String?
+  notes       String?
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  expenses    Expense[]
+
+  @@index([name])
+  @@index([isDeleted])
+}
+
+model Expense {
+  id                  String               @id @default(cuid())
+  expenseNumber       String               @unique
+  title               String
+  categoryId          String
+  category            ExpenseCategory      @relation(fields: [categoryId], references: [id])
+  vendorId            String?
+  vendor              Vendor?              @relation(fields: [vendorId], references: [id])
+  amount              Float                @default(0)
+  taxRate             Float                @default(0)
+  taxAmount           Float                @default(0)
+  isTaxInclusive      Boolean              @default(false)
+  totalAmount         Float                @default(0)
+  paymentMethod       ExpensePaymentMethod @default(CASH)
+  status              ExpenseStatus        @default(PENDING)
+  expenseDate         DateTime             @default(now())
+  dueDate             DateTime?
+  paidAt              DateTime?
+  referenceNumber     String?
+  notes               String?
+  receiptUrl          String?
+  receiptPublicId     String?
+  receiptOriginalName String?
+  receiptMimeType     String?
+  receiptSize         Int?
+  createdBy           String?
+  isDeleted           Boolean              @default(false)
+  deletedAt           DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @default(now()) @updatedAt
+  auditLogs           ExpenseAuditLog[]
+
+  @@index([categoryId])
+  @@index([vendorId])
+  @@index([status])
+  @@index([expenseDate])
+  @@index([isDeleted])
+  @@index([referenceNumber])
+}
+
+model ExpenseAuditLog {
+  id          String   @id @default(cuid())
+  expenseId   String
+  expense     Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  action      String
+  details     String
+  performedBy String?
+  userRole    String?
+  createdAt   DateTime @default(now())
+
+  @@index([expenseId])
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        String   @default("INFO")
+  createdAt   DateTime @default(now())
+}
+
+enum QuotationStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  CONVERTED
+  EXPIRED
+}
+
+model Quotation {
+  id                 String          @id @default(cuid())
+  quotationNumber    String          @unique
+  clientId           String
+  client             Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  issueDate          DateTime        @default(now())
+  expiryDate         DateTime
+  status             QuotationStatus @default(DRAFT)
+  currency           String          @default("INR")
+  subtotal           Float           @default(0)
+  discount           Float           @default(0)
+  tax                Float           @default(0)
+  totalAdditiveTax  Float           @default(0)
+  totalDeductionTax Float           @default(0)
+  grandTotal        Float           @default(0)
+  netPayable        Float           @default(0)
+  total              Float           @default(0)
+  notes              String?
+  terms              String?
+  approvedAt         DateTime?
+  approvedBy         String?
+  rejectedAt         DateTime?
+  rejectionReason    String?
+  convertedInvoiceId String?
+  createdBy          String?
+  isDeleted          Boolean         @default(false)
+  deletedAt          DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @default(now()) @updatedAt
+  items              QuotationItem[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([isDeleted])
+  @@index([expiryDate])
+}
+
+model QuotationItem {
+  id          String    @id @default(cuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Float     @default(1)
+  unitPrice   Float     @default(0)
+  lineAmount  Float     @default(0)
+  taxRate     Float     @default(0)
+  discount    Float     @default(0)
+  appliedTaxes Json    @default("[]")
+  total       Float     @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+}
+
+enum TaxType {
+  GST
+  CGST
+  SGST
+  IGST
+  TDS
+  VAT
+  CUSTOM
+}
+
+enum TaxValueType {
+  PERCENTAGE
+  FIXED
+}
+
+enum TaxCalculationType {
+  ADD
+  DEDUCT
+}
+
+model Tax {
+  id                String             @id @default(cuid())
+  name              String
+  code              String             @unique
+  type              TaxType            @default(GST)
+  category          String?
+  valueType         TaxValueType       @default(PERCENTAGE)
+  calculationType   TaxCalculationType @default(ADD)
+  rate              Float              @default(0)
+  country           String?            @default("India")
+  state             String?
+  description       String?
+  isActive          Boolean            @default(true)
+  isDefault         Boolean            @default(false)
+  effectiveFrom     DateTime?
+  effectiveTo       DateTime?
+  applicableModules String[]           @default(["INVOICE", "QUOTATION", "EXPENSE", "CREDIT_NOTE"])
+  createdBy         String?
+  updatedBy         String?
+  isDeleted         Boolean            @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
+  auditLogs         TaxAuditLog[]
+
+  @@index([code])
+  @@index([type])
+  @@index([isActive])
+  @@index([isDeleted])
+}
+
+model TaxAuditLog {
+  id          String   @id @default(cuid())
+  taxId       String
+  tax         Tax      @relation(fields: [taxId], references: [id], onDelete: Cascade)
+  action      String
+  details     String
+  performedBy String?
+  userRole    String?
+  createdAt   DateTime @default(now())
+
+  @@index([taxId])
+  @@index([createdAt])
+}
+
+model CreditNote {
+  id               String    @id @default(cuid())
+  creditNoteNumber String    @unique
+  invoiceId        String?
+  invoice          Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  clientId         String
+  client           Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reason           String
+  refundedAmount   Float     @default(0)
+  taxAdjustment    Float     @default(0)
+  totalAmount      Float     @default(0)
+  issueDate        DateTime  @default(now())
+  notes            String?
+  status           String    @default("ISSUED")
+  createdBy        String?
+  isDeleted        Boolean   @default(false)
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now()) @updatedAt
+
+  @@index([creditNoteNumber])
+  @@index([clientId])
+  @@index([invoiceId])
+  @@index([isDeleted])
+}
+
+model SystemSettings {
+  id                    String   @id @default("default")
+
+  // Company Preferences
+  companyName           String   @default("Ledgerly Billing Corp")
+  logoUrl               String?
+  businessEmail         String   @default("billing@ledgerly.io")
+  phone                 String   @default("+91 98765 43210")
+  website               String?  @default("https://ledgerly.io")
+  address               String?  @default("123 Financial District, Tech Hub")
+  city                  String?  @default("Bengaluru")
+  state                 String?  @default("Karnataka")
+  country               String?  @default("India")
+  postalCode            String?  @default("560001")
+  gstNumber             String?
+  panNumber             String?
+
+  // Invoice Preferences
+  invoicePrefix         String   @default("INV")
+  quotationPrefix       String   @default("QTN")
+  creditNotePrefix      String   @default("CN")
+  receiptPrefix         String   @default("RCT")
+  includeYearInNumber   Boolean  @default(true)
+  numberSeparator       String   @default("-")
+  startingNumber        Int      @default(1)
+  zeroPaddingLength     Int      @default(6)
+  defaultPaymentTerms   String   @default("Payment is due within 14 days of issue.")
+  defaultDueDays        Int      @default(14)
+  defaultCurrency       String   @default("INR")
+  timezone              String   @default("Asia/Kolkata")
+  dateFormat            String   @default("DD/MM/YYYY")
+  numberFormat          String   @default("en-IN")
+  decimalPrecision      Int      @default(2)
+
+  // Email Preferences
+  senderName            String   @default("Ledgerly Billing System")
+  senderEmail           String   @default("billing@ledgerly.io")
+  replyToEmail          String?  @default("support@ledgerly.io")
+  emailSignature        String?  @default("Best regards,\nFinance & Accounts Team\nLedgerly Corp")
+  defaultEmailFooter    String?  @default("Thank you for your business. For billing queries, reply directly to this email.")
+
+  // Reminder Preferences
+  autoReminderEnabled   Boolean  @default(true)
+  reminderBeforeDueDays Int      @default(3)
+  reminderAfterDueDays  Int      @default(3)
+  reminderFrequencyDays Int      @default(7)
+
+  // Appearance Preferences
+  theme                 String   @default("system")
+  defaultTablePageSize  Int      @default(10)
+  defaultDashboardPage  String   @default("/dashboard")
+  defaultLanguage       String   @default("en")
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
+  updatedBy             String?
+}
+
+model DocumentSequence {
+  id           String   @id
+  entityType   String   @unique
+  currentValue Int      @default(0)
+  updatedAt    DateTime @updatedAt
+}
+
+enum AuditStatus {
+  SUCCESS
+  FAILED
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName    String?
+  userEmail   String?
+  role        String?
+  action      String
+  module      String
+  entityType  String?
+  entityId    String?
+  entityName  String?
+  description String
+  oldValue    Json?       @default("{}")
+  newValue    Json?       @default("{}")
+  ipAddress   String?
+  userAgent   String?
+  status      AuditStatus @default(SUCCESS)
+  createdAt   DateTime    @default(now())
+
+  @@index([createdAt])
+  @@index([module])
+  @@index([action])
+  @@index([userId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([status])
+  @@index([entityType, entityId])
+}
