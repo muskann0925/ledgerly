@@ -99,17 +99,38 @@ export const PaymentDetailsDialog: React.FC<PaymentDetailsDialogProps> = ({
                     {payment.isDeleted ? (
                       <Badge
                         variant="outline"
-                        className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50 font-semibold text-[11px]"
+                        className="bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 font-semibold text-[11px]"
                       >
                         <XCircle className="w-3 h-3 mr-1" />
                         Soft Deleted
                       </Badge>
-                    ) : (
+                    ) : (payment.status || "SUCCESS") === "SUCCESS" ? (
                       <Badge
                         variant="outline"
                         className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50 font-semibold text-[11px]"
                       >
-                        Recorded
+                        Paid
+                      </Badge>
+                    ) : payment.status === "PENDING" ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900/50 font-semibold text-[11px]"
+                      >
+                        Pending
+                      </Badge>
+                    ) : payment.status === "FAILED" ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900/50 font-semibold text-[11px]"
+                      >
+                        Failed
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-900/50 font-semibold text-[11px]"
+                      >
+                        Refunded
                       </Badge>
                     )}
                   </div>

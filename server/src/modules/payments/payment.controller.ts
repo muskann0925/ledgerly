@@ -168,6 +168,23 @@ export class PaymentController {
       next(error);
     }
   };
+  retryPayment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const id = this.getParamId(req, "id");
+      const userId = req.user?.userId;
+      const { status = "SUCCESS", failureReason } = req.body;
+      const payment = await this.service.retryPayment(id, { status, failureReason }, userId);
+      res
+        .status(200)
+        .json(createApiResponse(true, `Payment status updated to ${status}`, payment));
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export const paymentController = new PaymentController();

@@ -56,6 +56,9 @@ export class PaymentService {
   /**
    * Create payment & update invoice status/amounts
    */
+  /**
+   * Create payment & update invoice status/amounts
+   */
   async createPayment(
     data: CreatePaymentDto,
     createdBy?: string
@@ -96,7 +99,8 @@ export class PaymentService {
       );
     }
 
-    const newActiveSum = currentActiveSum + data.amount;
+    const status = data.status || "SUCCESS";
+    const newActiveSum = status === "SUCCESS" ? currentActiveSum + data.amount : currentActiveSum;
     const invoiceUpdate = this.calculateInvoiceStatusAndTotals(
       netPayable,
       invoice.dueDate,
@@ -105,7 +109,7 @@ export class PaymentService {
     );
 
     const payment = await this.repository.createPaymentWithInvoiceUpdate(
-      { ...data, createdBy },
+      { ...data, status, createdBy },
       invoiceUpdate
     );
 
@@ -115,20 +119,22 @@ export class PaymentService {
       currency: invoice.currency || "INR",
     }).format(data.amount);
 
-    await notificationService.notifyUsersForEvent(
-      NotificationType.PAYMENT_RECEIVED,
-      `Payment Received: ${formattedAmount}`,
-      `Payment of ${formattedAmount} received for Invoice ${invoice.number} (${clientName}).`,
-      "Payment",
-      payment.id,
-      {
-        paymentId: payment.id,
-        invoiceId: invoice.id,
-        invoiceNumber: invoice.number,
-        amount: data.amount,
-        clientName,
-      }
-    );
+    if (status === "SUCCESS") {
+      await notificationService.notifyUsersForEvent(
+        NotificationType.PAYMENT_RECEIVED,
+        `Payment Received: ${formattedAmount}`,
+        `Payment of ${formattedAmount} received for Invoice ${invoice.number} (${clientName}).`,
+        "Payment",
+        payment.id,
+        {
+          paymentId: payment.id,
+          invoiceId: invoice.id,
+          invoiceNumber: invoice.number,
+          amount: data.amount,
+          clientName,
+        }
+      );
+    }
 
     await auditLogService.logAction({
       userId: createdBy,
@@ -137,17 +143,78 @@ export class PaymentService {
       entityType: "Payment",
       entityId: payment.id,
       entityName: invoice.number,
-      description: `Recorded payment of ${invoice.currency} ${data.amount.toFixed(2)} for invoice #${invoice.number}`,
+      description: `Payment transaction recorded with status '${status}' for ${invoice.currency} ${data.amount.toFixed(2)} on invoice #${invoice.number}`,
       newValue: {
         paymentId: payment.id,
         invoiceId: invoice.id,
         amount: data.amount,
         paymentMethod: data.paymentMethod,
+        status,
       },
       status: "SUCCESS",
     });
 
     return payment;
+  }
+
+  /**
+   * Retry or update status of an existing payment (e.g. from PENDING or FAILED to SUCCESS)
+   */
+  async retryPayment(
+    id: string,
+    payload: { status: "SUCCESS" | "FAILED" | "PENDING"; failureReason?: string },
+    userId?: string
+  ): Promise<Payment> {
+    const existingPayment = await this.repository.findById(id);
+    if (!existingPayment || existingPayment.isDeleted) {
+      throw AppError.notFound(`Payment with ID '${id}' not found`);
+    }
+
+    const invoice = await invoiceRepository.findById(existingPayment.invoiceId);
+    if (!invoice || invoice.isDeleted) {
+      throw AppError.notFound("Associated invoice not found or deleted");
+    }
+
+    const netPayable = invoice.netPayable || invoice.total;
+    const activePaymentsSum = await this.repository.calculateActivePaymentsSum(
+      existingPayment.invoiceId,
+      existingPayment.id
+    );
+
+    const proposedActiveSum = payload.status === "SUCCESS"
+      ? activePaymentsSum + existingPayment.amount
+      : activePaymentsSum;
+
+    const invoiceUpdate = this.calculateInvoiceStatusAndTotals(
+      netPayable,
+      invoice.dueDate,
+      invoice.status,
+      proposedActiveSum
+    );
+
+    const updatedPayment = await this.repository.updatePaymentWithInvoiceUpdate(
+      id,
+      {
+        status: payload.status as any,
+        failureReason: payload.failureReason || null,
+      },
+      existingPayment.invoiceId,
+      invoiceUpdate
+    );
+
+    await auditLogService.logAction({
+      userId,
+      action: "RETRY_PAYMENT",
+      module: "PAYMENTS",
+      entityType: "Payment",
+      entityId: id,
+      entityName: invoice.number,
+      description: `Payment ${id} status updated to ${payload.status}`,
+      newValue: { status: payload.status },
+      status: "SUCCESS",
+    });
+
+    return updatedPayment;
   }
 
   /**

@@ -87,4 +87,15 @@ export const paymentsApi = {
     const response = await apiClient.post<ApiResponse<Payment>>(`/payments/${id}/send-email`, payload);
     return response.data.data;
   },
+
+  /**
+   * Retry or update payment status
+   */
+  retryPayment: async (
+    id: string,
+    payload: { status: "SUCCESS" | "FAILED" | "PENDING"; failureReason?: string }
+  ): Promise<Payment> => {
+    const response = await apiClient.post<ApiResponse<Payment>>(`/payments/${id}/retry`, payload);
+    return response.data.data;
+  },
 };

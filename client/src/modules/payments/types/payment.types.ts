@@ -7,6 +7,8 @@ export type PaymentMethod =
   | "CHEQUE"
   | "OTHER";
 
+export type PaymentStatus = "SUCCESS" | "PENDING" | "FAILED" | "REFUNDED";
+
 export interface PaymentClientSummary {
   id: string;
   companyName: string;
@@ -33,6 +35,8 @@ export interface Payment {
   amount: number;
   paymentDate: string;
   paymentMethod: PaymentMethod;
+  status: PaymentStatus;
+  failureReason?: string | null;
   referenceNumber?: string | null;
   notes?: string | null;
   createdBy?: string | null;
@@ -47,6 +51,8 @@ export interface CreatePaymentPayload {
   amount: number;
   paymentDate?: string;
   paymentMethod: PaymentMethod;
+  status?: PaymentStatus;
+  failureReason?: string | null;
   referenceNumber?: string | null;
   notes?: string | null;
 }
@@ -55,6 +61,8 @@ export interface UpdatePaymentPayload {
   amount?: number;
   paymentDate?: string;
   paymentMethod?: PaymentMethod;
+  status?: PaymentStatus;
+  failureReason?: string | null;
   referenceNumber?: string | null;
   notes?: string | null;
 }
@@ -64,6 +72,7 @@ export interface PaymentQueryParams {
   limit?: number;
   search?: string;
   paymentMethod?: PaymentMethod | "ALL";
+  status?: PaymentStatus | "ALL";
   startDate?: string;
   endDate?: string;
   isDeleted?: boolean;
@@ -90,3 +99,4 @@ export interface ApiResponse<T> {
   message: string;
   data: T;
 }
+

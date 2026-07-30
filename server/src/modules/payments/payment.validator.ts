@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentMethod } from "@prisma/client";
+import { PaymentMethod, PaymentStatus } from "@prisma/client";
 
 const nonWhitespaceString = z
   .string()
@@ -13,6 +13,8 @@ export const createPaymentSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod, {
     message: "Invalid payment method",
   }),
+  status: z.nativeEnum(PaymentStatus).optional().default("SUCCESS"),
+  failureReason: z.string().trim().max(300, "Failure reason cannot exceed 300 characters").optional().nullable(),
   referenceNumber: z.string().trim().max(100, "Reference number cannot exceed 100 characters").optional().nullable(),
   notes: z.string().trim().max(500, "Notes cannot exceed 500 characters").optional().nullable(),
 });
@@ -23,6 +25,8 @@ export const updatePaymentSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod, {
     message: "Invalid payment method",
   }).optional(),
+  status: z.nativeEnum(PaymentStatus).optional(),
+  failureReason: z.string().trim().max(300).optional().nullable(),
   referenceNumber: z.string().trim().max(100, "Reference number cannot exceed 100 characters").optional().nullable(),
   notes: z.string().trim().max(500, "Notes cannot exceed 500 characters").optional().nullable(),
 });
@@ -38,11 +42,20 @@ const ALL_METHODS = [
   "OTHER",
 ] as const;
 
+const ALL_STATUSES = [
+  "ALL",
+  "SUCCESS",
+  "PENDING",
+  "FAILED",
+  "REFUNDED",
+] as const;
+
 export const paymentQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
   search: z.string().trim().optional(),
   paymentMethod: z.enum(ALL_METHODS).optional().default("ALL"),
+  status: z.enum(ALL_STATUSES).optional().default("ALL"),
   startDate: z.string().trim().optional(),
   endDate: z.string().trim().optional(),
   isDeleted: z
@@ -58,3 +71,4 @@ export const paymentQuerySchema = z.object({
     .default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
+

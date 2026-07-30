@@ -86,6 +86,11 @@ export class PaymentRepository {
       where.paymentMethod = options.paymentMethod as PaymentMethod;
     }
 
+    // Filter by Payment Status
+    if (options.status && options.status !== "ALL") {
+      where.status = options.status as any;
+    }
+
     // Filter by Payment Date range
     if (options.startDate || options.endDate) {
       where.paymentDate = {};
@@ -99,6 +104,7 @@ export class PaymentRepository {
       where.OR = [
         { referenceNumber: { contains: query, mode: "insensitive" } },
         { notes: { contains: query, mode: "insensitive" } },
+        { failureReason: { contains: query, mode: "insensitive" } },
         {
           invoice: {
             OR: [
@@ -149,7 +155,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Compute sum of active payments for an invoice inside a transaction client
+   * Compute sum of active SUCCESS payments for an invoice inside a transaction client
    */
   async calculateActivePaymentsSum(
     invoiceId: string,
@@ -162,6 +168,7 @@ export class PaymentRepository {
       where: {
         invoiceId,
         isDeleted: false,
+        status: "SUCCESS",
         ...(excludePaymentId ? { id: { not: excludePaymentId } } : {}),
       },
     });
@@ -180,6 +187,7 @@ export class PaymentRepository {
       // Generate unique payment sequence number
       const paymentNumber = await sequenceService.generateNextNumber("PAYMENT", tx);
       const referenceNumber = paymentData.referenceNumber?.trim() || paymentNumber;
+      const status = paymentData.status || "SUCCESS";
 
       const payment = await tx.payment.create({
         data: {
@@ -187,6 +195,8 @@ export class PaymentRepository {
           amount: paymentData.amount,
           paymentDate: paymentData.paymentDate ? new Date(paymentData.paymentDate) : new Date(),
           paymentMethod: paymentData.paymentMethod,
+          status,
+          failureReason: paymentData.failureReason || null,
           referenceNumber,
           notes: paymentData.notes || null,
           createdBy: paymentData.createdBy || null,
@@ -222,8 +232,10 @@ export class PaymentRepository {
         await tx.clientActivity.create({
           data: {
             clientId: payment.invoice.clientId,
-            action: "PAYMENT_RECEIVED",
-            description: `Recorded payment of ₹${paymentData.amount.toLocaleString("en-IN")} (Ref: ${referenceNumber}) for Invoice #${payment.invoice.number}`,
+            action: status === "SUCCESS" ? "PAYMENT_RECEIVED" : `PAYMENT_${status}`,
+            description: status === "SUCCESS"
+              ? `Recorded payment of ₹${paymentData.amount.toLocaleString("en-IN")} (Ref: ${referenceNumber}) for Invoice #${payment.invoice.number}`
+              : `Payment attempt of ₹${paymentData.amount.toLocaleString("en-IN")} (${status}) for Invoice #${payment.invoice.number}`,
             performedBy: paymentData.createdBy || "System",
           },
         });
@@ -252,6 +264,12 @@ export class PaymentRepository {
           }),
           ...(paymentData.paymentMethod !== undefined && {
             paymentMethod: paymentData.paymentMethod,
+          }),
+          ...(paymentData.status !== undefined && {
+            status: paymentData.status,
+          }),
+          ...(paymentData.failureReason !== undefined && {
+            failureReason: paymentData.failureReason,
           }),
           ...(paymentData.referenceNumber !== undefined && {
             referenceNumber: paymentData.referenceNumber,

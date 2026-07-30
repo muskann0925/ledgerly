@@ -183,3 +183,35 @@ export const useSendPaymentEmailMutation = (onSuccessCallback?: () => void) => {
     },
   });
 };
+
+/**
+ * Mutation: Retry Payment / Update Status
+ */
+export const useRetryPaymentMutation = (onSuccessCallback?: () => void) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: { status: "SUCCESS" | "FAILED" | "PENDING"; failureReason?: string };
+    }) => paymentsApi.retryPayment(id, payload),
+    onSuccess: (data) => {
+      invalidateRelatedQueries(queryClient);
+      queryClient.invalidateQueries({ queryKey: [PAYMENT_DETAILS_QUERY_KEY, data.id] });
+      if (data.status === "SUCCESS") {
+        toast.success(`Payment of ₹${data.amount.toLocaleString("en-IN")} completed successfully!`);
+      } else if (data.status === "FAILED") {
+        toast.error(`Payment marked as failed: ${data.failureReason || "Transaction failed"}`);
+      } else {
+        toast.info("Payment status set to Pending");
+      }
+      if (onSuccessCallback) onSuccessCallback();
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Failed to update payment status"));
+    },
+  });
+};

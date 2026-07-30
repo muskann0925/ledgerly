@@ -67,4 +67,12 @@ router.post(
   paymentController.sendEmail
 );
 
+// Retry / Refresh Payment Status
+router.post(
+  "/:id/retry",
+  authenticate,
+  authorize("OWNER", "ADMIN", "SALES", "FINANCE"),
+  paymentController.retryPayment
+);
+
 export default router;

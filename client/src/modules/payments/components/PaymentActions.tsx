@@ -12,20 +12,21 @@ import { Button } from "../../../components/ui/button";
 import {
   MoreHorizontal,
   Eye,
-  Edit,
   Download,
   Printer,
   Mail,
   Trash2,
   RotateCcw,
+  RefreshCw,
 } from "lucide-react";
 
 interface PaymentActionsProps {
   payment: Payment;
   onView: (payment: Payment) => void;
-  onEdit: (payment: Payment) => void;
   onDelete: (payment: Payment) => void;
   onRestore: (payment: Payment) => void;
+  onRetryPayment?: (payment: Payment) => void;
+  onRefreshStatus?: (payment: Payment) => void;
   onDownloadReceipt?: (payment: Payment) => void;
   onPreviewReceipt?: (payment: Payment) => void;
   onPrintReceipt?: (payment: Payment) => void;
@@ -35,14 +36,19 @@ interface PaymentActionsProps {
 export const PaymentActions: React.FC<PaymentActionsProps> = ({
   payment,
   onView,
-  onEdit,
   onDelete,
   onRestore,
+  onRetryPayment,
+  onRefreshStatus,
   onDownloadReceipt,
   onPreviewReceipt,
   onPrintReceipt,
   onEmailReceipt,
 }) => {
+  const isSuccess = (payment.status || "SUCCESS") === "SUCCESS";
+  const isFailed = payment.status === "FAILED";
+  const isPending = payment.status === "PENDING";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -73,8 +79,30 @@ export const PaymentActions: React.FC<PaymentActionsProps> = ({
           View Details
         </DropdownMenuItem>
 
-        {/* Download Receipt PDF */}
-        {onDownloadReceipt && (
+        {/* Retry Payment (if FAILED) */}
+        {isFailed && onRetryPayment && (
+          <DropdownMenuItem
+            onClick={() => onRetryPayment(payment)}
+            className="rounded-lg text-xs cursor-pointer py-1.5 px-2 text-rose-600 dark:text-rose-400 focus:bg-rose-50 dark:focus:bg-rose-950/40 font-semibold"
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-2 text-rose-500" />
+            Retry Payment
+          </DropdownMenuItem>
+        )}
+
+        {/* Refresh Status (if PENDING) */}
+        {isPending && onRefreshStatus && (
+          <DropdownMenuItem
+            onClick={() => onRefreshStatus(payment)}
+            className="rounded-lg text-xs cursor-pointer py-1.5 px-2 text-amber-600 dark:text-amber-400 focus:bg-amber-50 dark:focus:bg-amber-950/40 font-semibold"
+          >
+            <RefreshCw className="w-3.5 h-3.5 mr-2 text-amber-500" />
+            Refresh Status
+          </DropdownMenuItem>
+        )}
+
+        {/* Download Receipt PDF (if PAID/SUCCESS) */}
+        {isSuccess && onDownloadReceipt && (
           <DropdownMenuItem
             onClick={() => onDownloadReceipt(payment)}
             className="rounded-lg text-xs cursor-pointer py-1.5 px-2 text-slate-700 dark:text-slate-300 focus:bg-slate-50 dark:focus:bg-slate-800"
@@ -84,8 +112,8 @@ export const PaymentActions: React.FC<PaymentActionsProps> = ({
           </DropdownMenuItem>
         )}
 
-        {/* Preview Receipt */}
-        {onPreviewReceipt && (
+        {/* Preview Receipt (if PAID/SUCCESS) */}
+        {isSuccess && onPreviewReceipt && (
           <DropdownMenuItem
             onClick={() => onPreviewReceipt(payment)}
             className="rounded-lg text-xs cursor-pointer py-1.5 px-2 text-slate-700 dark:text-slate-300 focus:bg-slate-50 dark:focus:bg-slate-800"
@@ -95,8 +123,8 @@ export const PaymentActions: React.FC<PaymentActionsProps> = ({
           </DropdownMenuItem>
         )}
 
-        {/* Print Receipt */}
-        {onPrintReceipt && (
+        {/* Print Receipt (if PAID/SUCCESS) */}
+        {isSuccess && onPrintReceipt && (
           <DropdownMenuItem
             onClick={() => onPrintReceipt(payment)}
             className="rounded-lg text-xs cursor-pointer py-1.5 px-2 text-slate-700 dark:text-slate-300 focus:bg-slate-50 dark:focus:bg-slate-800"
@@ -106,25 +134,14 @@ export const PaymentActions: React.FC<PaymentActionsProps> = ({
           </DropdownMenuItem>
         )}
 
-        {/* Email Receipt */}
-        {onEmailReceipt && (
+        {/* Email Receipt (if PAID/SUCCESS) */}
+        {isSuccess && onEmailReceipt && (
           <DropdownMenuItem
             onClick={() => onEmailReceipt(payment)}
             className="rounded-lg text-xs cursor-pointer py-1.5 px-2 text-slate-700 dark:text-slate-300 focus:bg-slate-50 dark:focus:bg-slate-800"
           >
             <Mail className="w-3.5 h-3.5 mr-2 text-slate-400" />
             Email Receipt
-          </DropdownMenuItem>
-        )}
-
-        {/* Edit */}
-        {!payment.isDeleted && (
-          <DropdownMenuItem
-            onClick={() => onEdit(payment)}
-            className="rounded-lg text-xs cursor-pointer py-1.5 px-2 text-slate-700 dark:text-slate-300 focus:bg-slate-50 dark:focus:bg-slate-800"
-          >
-            <Edit className="w-3.5 h-3.5 mr-2 text-slate-400" />
-            Edit Payment
           </DropdownMenuItem>
         )}
 
@@ -152,3 +169,4 @@ export const PaymentActions: React.FC<PaymentActionsProps> = ({
     </DropdownMenu>
   );
 };
+

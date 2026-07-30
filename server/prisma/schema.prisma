@@ -233,6 +233,13 @@ enum PaymentMethod {
   OTHER
 }
 
+enum PaymentStatus {
+  SUCCESS
+  PENDING
+  FAILED
+  REFUNDED
+}
+
 model Payment {
   id              String        @id @default(cuid())
   invoiceId       String
@@ -240,6 +247,8 @@ model Payment {
   amount          Float
   paymentDate     DateTime      @default(now())
   paymentMethod   PaymentMethod @default(CASH)
+  status          PaymentStatus @default(SUCCESS)
+  failureReason   String?
   referenceNumber String?
   notes           String?
   createdBy       String?
@@ -252,6 +261,7 @@ model Payment {
   @@index([paymentDate])
   @@index([isDeleted])
   @@index([paymentMethod])
+  @@index([status])
 }
 
 enum ExpenseStatus {

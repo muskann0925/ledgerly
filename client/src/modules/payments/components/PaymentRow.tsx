@@ -9,9 +9,10 @@ import { XCircle } from "lucide-react";
 interface PaymentRowProps {
   payment: Payment;
   onView: (payment: Payment) => void;
-  onEdit: (payment: Payment) => void;
   onDelete: (payment: Payment) => void;
   onRestore: (payment: Payment) => void;
+  onRetryPayment?: (payment: Payment) => void;
+  onRefreshStatus?: (payment: Payment) => void;
   onDownloadReceipt?: (payment: Payment) => void;
   onPreviewReceipt?: (payment: Payment) => void;
   onPrintReceipt?: (payment: Payment) => void;
@@ -21,9 +22,10 @@ interface PaymentRowProps {
 export const PaymentRow: React.FC<PaymentRowProps> = ({
   payment,
   onView,
-  onEdit,
   onDelete,
   onRestore,
+  onRetryPayment,
+  onRefreshStatus,
   onDownloadReceipt,
   onPreviewReceipt,
   onPrintReceipt,
@@ -47,6 +49,69 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
       currency: currency || "INR",
       maximumFractionDigits: 2,
     }).format(val);
+  };
+
+  const renderStatusBadge = () => {
+    if (payment.isDeleted) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 font-semibold gap-1 py-0.5 px-2 text-[11px]"
+        >
+          <XCircle className="w-3 h-3" />
+          Deleted
+        </Badge>
+      );
+    }
+
+    const status = payment.status || "SUCCESS";
+    switch (status) {
+      case "SUCCESS":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50 font-semibold py-0.5 px-2 text-[11px]"
+          >
+            Paid
+          </Badge>
+        );
+      case "PENDING":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900/50 font-semibold py-0.5 px-2 text-[11px]"
+          >
+            Pending
+          </Badge>
+        );
+      case "FAILED":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900/50 font-semibold py-0.5 px-2 text-[11px]"
+          >
+            Failed
+          </Badge>
+        );
+      case "REFUNDED":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-900/50 font-semibold py-0.5 px-2 text-[11px]"
+          >
+            Refunded
+          </Badge>
+        );
+      default:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50 font-semibold py-0.5 px-2 text-[11px]"
+          >
+            Paid
+          </Badge>
+        );
+    }
   };
 
   return (
@@ -94,22 +159,7 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
 
       {/* Status */}
       <TableCell className="py-3.5 px-4 text-xs whitespace-nowrap">
-        {payment.isDeleted ? (
-          <Badge
-            variant="outline"
-            className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50 font-semibold gap-1 py-0.5 px-2 text-[11px]"
-          >
-            <XCircle className="w-3 h-3" />
-            Deleted
-          </Badge>
-        ) : (
-          <Badge
-            variant="outline"
-            className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50 font-semibold py-0.5 px-2 text-[11px]"
-          >
-            Recorded
-          </Badge>
-        )}
+        {renderStatusBadge()}
       </TableCell>
 
       {/* Actions */}
@@ -117,9 +167,10 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
         <PaymentActions
           payment={payment}
           onView={onView}
-          onEdit={onEdit}
           onDelete={onDelete}
           onRestore={onRestore}
+          onRetryPayment={onRetryPayment}
+          onRefreshStatus={onRefreshStatus}
           onDownloadReceipt={onDownloadReceipt}
           onPreviewReceipt={onPreviewReceipt}
           onPrintReceipt={onPrintReceipt}

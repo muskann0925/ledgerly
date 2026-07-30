@@ -1,10 +1,12 @@
-import { PaymentMethod, Payment } from "@prisma/client";
+import { PaymentMethod, PaymentStatus, Payment } from "@prisma/client";
 
 export interface CreatePaymentDto {
   invoiceId: string;
   amount: number;
   paymentDate?: string | Date;
   paymentMethod: PaymentMethod;
+  status?: PaymentStatus;
+  failureReason?: string | null;
   referenceNumber?: string | null;
   notes?: string | null;
 }
@@ -13,6 +15,8 @@ export interface UpdatePaymentDto {
   amount?: number;
   paymentDate?: string | Date;
   paymentMethod?: PaymentMethod;
+  status?: PaymentStatus;
+  failureReason?: string | null;
   referenceNumber?: string | null;
   notes?: string | null;
 }
@@ -22,6 +26,7 @@ export interface PaymentQueryOptions {
   limit?: number;
   search?: string;
   paymentMethod?: PaymentMethod | "ALL";
+  status?: PaymentStatus | "ALL";
   startDate?: string;
   endDate?: string;
   isDeleted?: boolean;
@@ -41,4 +46,5 @@ export interface PaginatedPaymentsResult<T> {
   };
 }
 
-export type { Payment };
+export type { Payment, PaymentStatus };
+

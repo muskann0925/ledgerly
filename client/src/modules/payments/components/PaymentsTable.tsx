@@ -13,9 +13,10 @@ import {
 interface PaymentsTableProps {
   payments: Payment[];
   onView: (payment: Payment) => void;
-  onEdit: (payment: Payment) => void;
   onDelete: (payment: Payment) => void;
   onRestore: (payment: Payment) => void;
+  onRetryPayment?: (payment: Payment) => void;
+  onRefreshStatus?: (payment: Payment) => void;
   onDownloadReceipt?: (payment: Payment) => void;
   onPreviewReceipt?: (payment: Payment) => void;
   onPrintReceipt?: (payment: Payment) => void;
@@ -25,9 +26,10 @@ interface PaymentsTableProps {
 export const PaymentsTable: React.FC<PaymentsTableProps> = ({
   payments,
   onView,
-  onEdit,
   onDelete,
   onRestore,
+  onRetryPayment,
+  onRefreshStatus,
   onDownloadReceipt,
   onPreviewReceipt,
   onPrintReceipt,
@@ -55,7 +57,7 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
                 Method
               </TableHead>
               <TableHead className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 py-3.5 px-4">
-                Reference ID
+                Transaction ID
               </TableHead>
               <TableHead className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 py-3.5 px-4">
                 Status
@@ -82,9 +84,10 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   key={payment.id}
                   payment={payment}
                   onView={onView}
-                  onEdit={onEdit}
                   onDelete={onDelete}
                   onRestore={onRestore}
+                  onRetryPayment={onRetryPayment}
+                  onRefreshStatus={onRefreshStatus}
                   onDownloadReceipt={onDownloadReceipt}
                   onPreviewReceipt={onPreviewReceipt}
                   onPrintReceipt={onPrintReceipt}
