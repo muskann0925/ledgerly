@@ -84,18 +84,19 @@ export const ReportsPage: React.FC = () => {
 
         <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
           {/* Page Banner Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
-                <BarChart3 className="w-4 h-4" />
-                <span>Financial Intelligence & Analytics</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <BarChart3 className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Financial Reports & Intelligence
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Information-dense SaaS analytics, revenue trends, tax liabilities, and P&L reports.
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Financial Reports & Intelligence
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Information-dense SaaS analytics, revenue trends, tax liabilities, and P&L reports.
+                </p>
+              </div>
             </div>
           </div>
 

@@ -67,7 +67,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     <div className="flex items-center gap-2 select-none shrink-0">
       {/* Status Filter */}
       <Select value={status} onValueChange={(val) => onStatusChange(val as any)}>
-        <SelectTrigger className="h-10 text-xs rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-36 shrink-0">
+        <SelectTrigger className="h-9 text-xs font-semibold rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-36 shrink-0">
           <Filter className="w-3.5 h-3.5 mr-1 text-slate-400" />
           <SelectValue placeholder="Status" />
         </SelectTrigger>
@@ -84,7 +84,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
       {/* Client Filter */}
       <Select value={clientId} onValueChange={onClientIdChange}>
-        <SelectTrigger className="h-10 text-xs rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-40 shrink-0">
+        <SelectTrigger className="h-9 text-xs font-semibold rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-40 shrink-0">
           <Building2 className="w-3.5 h-3.5 mr-1 text-slate-400" />
           <SelectValue placeholder="All Clients" />
         </SelectTrigger>
@@ -104,7 +104,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         value={startDate}
         onChange={(e) => onStartDateChange(e.target.value)}
         placeholder="Start Date"
-        className="h-10 text-xs rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-36 shrink-0"
+        className="h-9 text-xs rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-36 shrink-0"
       />
 
       {/* Date Range End */}
@@ -113,22 +113,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         value={endDate}
         onChange={(e) => onEndDateChange(e.target.value)}
         placeholder="End Date"
-        className="h-10 text-xs rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-36 shrink-0"
+        className="h-9 text-xs rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-36 shrink-0"
       />
 
       {/* Sort By */}
       <Select value={sortBy} onValueChange={(val) => onSortByChange(val as any)}>
-        <SelectTrigger className="h-10 text-xs rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-36 shrink-0">
-          <ArrowUpDown className="w-3.5 h-3.5 mr-1 text-slate-400" />
+        <SelectTrigger className="h-9 text-xs font-semibold rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 shadow-xs w-36 shrink-0">
           <SelectValue placeholder="Sort By" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="createdAt">Created Date</SelectItem>
-          <SelectItem value="quotationNumber">Quotation No.</SelectItem>
-          <SelectItem value="issueDate">Issue Date</SelectItem>
-          <SelectItem value="expiryDate">Expiry Date</SelectItem>
-          <SelectItem value="total">Total Amount</SelectItem>
-          <SelectItem value="status">Status</SelectItem>
+          <SelectItem value="createdAt">Sort: Created Date</SelectItem>
+          <SelectItem value="quotationNumber">Sort: Quotation No.</SelectItem>
+          <SelectItem value="issueDate">Sort: Issue Date</SelectItem>
+          <SelectItem value="expiryDate">Sort: Expiry Date</SelectItem>
+          <SelectItem value="total">Sort: Total Amount</SelectItem>
+          <SelectItem value="status">Sort: Status</SelectItem>
         </SelectContent>
       </Select>
 
@@ -137,9 +136,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         variant="outline"
         size="sm"
         onClick={() => onSortOrderChange(sortOrder === "desc" ? "asc" : "desc")}
-        className="h-10 rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 text-xs font-semibold px-3 shrink-0"
+        className="h-9 w-9 p-0 rounded-xl bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0"
+        title={`Sort ${sortOrder === "asc" ? "Ascending" : "Descending"}`}
       >
-        {sortOrder.toUpperCase()}
+        <ArrowUpDown className="w-3.5 h-3.5" />
       </Button>
 
       {/* Expired Toggle */}
@@ -147,7 +147,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         variant={isExpired ? "default" : "outline"}
         size="sm"
         onClick={() => onIsExpiredChange(!isExpired)}
-        className={`h-10 rounded-xl text-xs font-semibold px-3 shrink-0 ${
+        className={`h-9 rounded-xl text-xs font-semibold px-3 shrink-0 ${
           isExpired
             ? "bg-amber-600 hover:bg-amber-700 text-white"
             : "bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300"
@@ -161,13 +161,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         variant={isDeleted ? "default" : "outline"}
         size="sm"
         onClick={() => onIsDeletedChange(!isDeleted)}
-        className={`h-10 rounded-xl text-xs font-semibold px-3 shrink-0 ${
+        className={`h-9 rounded-xl text-xs font-semibold px-3 shrink-0 ${
           isDeleted
-            ? "bg-red-600 hover:bg-red-700 text-white"
+            ? "bg-rose-600 hover:bg-rose-700 text-white"
             : "bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300"
         }`}
       >
-        {isDeleted ? "Showing Deleted" : "Trash"}
+        {isDeleted ? "Showing Trash" : "Trash"}
       </Button>
 
       {/* Reset Filters */}
@@ -176,7 +176,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           variant="ghost"
           size="sm"
           onClick={onResetFilters}
-          className="h-10 rounded-xl text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white px-2.5 shrink-0"
+          className="h-9 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl shrink-0"
         >
           <RotateCcw className="w-3.5 h-3.5 mr-1" />
           Reset

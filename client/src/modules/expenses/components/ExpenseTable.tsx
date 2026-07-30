@@ -2,7 +2,6 @@ import React from "react";
 import {
   Eye,
   Edit2,
-  Trash2,
   RotateCcw,
   Paperclip,
   CheckCircle,
@@ -28,7 +27,7 @@ interface ExpenseTableProps {
   onFilterChange: (updated: Partial<ExpenseQueryFilters>) => void;
   onViewDetails: (expense: Expense) => void;
   onEditExpense: (expense: Expense) => void;
-  onDeleteExpense: (id: string) => void;
+  onDeleteExpense?: (id: string) => void;
   onRestoreExpense: (id: string) => void;
   onStatusChange: (id: string, status: "PAID" | "CANCELLED" | "PENDING") => void;
   selectedIds: string[];
@@ -45,7 +44,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
   onFilterChange,
   onViewDetails,
   onEditExpense,
-  onDeleteExpense,
+  onDeleteExpense: _onDeleteExpense,
   onRestoreExpense,
   onStatusChange,
   selectedIds,
@@ -294,16 +293,6 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
                             >
                               <CheckCircle className="w-3.5 h-3.5 mr-2" />
                               Mark as Paid
-                            </DropdownMenuItem>
-                          )}
-
-                          {canDelete && !item.isDeleted && (
-                            <DropdownMenuItem
-                              onClick={() => onDeleteExpense(item.id)}
-                              className="text-rose-600 dark:text-rose-400 focus:text-rose-600 dark:focus:text-rose-400"
-                            >
-                              <Trash2 className="w-3.5 h-3.5 mr-2" />
-                              Delete Expense
                             </DropdownMenuItem>
                           )}
 

@@ -51,6 +51,7 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle2,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -292,6 +293,57 @@ export const InvoicesPage: React.FC = () => {
     }).format(val || 0);
   };
 
+  const handleExportCSV = () => {
+    const invoicesList = data?.invoices || [];
+    if (!invoicesList.length) {
+      toast.error("Export Error", { description: "No invoice records available to export." });
+      return;
+    }
+
+    const headers = [
+      "Invoice Number",
+      "Client Name",
+      "Issue Date",
+      "Due Date",
+      "Subtotal",
+      "Tax Amount",
+      "Total Amount",
+      "Paid Amount",
+      "Amount Due",
+      "Currency",
+      "Status",
+    ];
+
+    const rows = invoicesList.map((inv) => {
+      const clientName = inv.client?.companyName || inv.client?.contactPerson || "N/A";
+      return [
+        `"${(inv.number || "").replace(/"/g, '""')}"`,
+        `"${clientName.replace(/"/g, '""')}"`,
+        inv.issueDate ? new Date(inv.issueDate).toISOString().slice(0, 10) : "",
+        inv.dueDate ? new Date(inv.dueDate).toISOString().slice(0, 10) : "",
+        inv.subtotal || 0,
+        inv.tax || 0,
+        inv.total || 0,
+        inv.amountPaid || 0,
+        inv.balanceDue || 0,
+        inv.currency || "INR",
+        `"${(inv.status || "").replace(/"/g, '""')}"`,
+      ];
+    });
+
+    const csvString = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Invoices_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("CSV Exported", { description: "Invoices exported successfully." });
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#090D16] text-[#111827] dark:text-[#F9FAFB] flex transition-colors duration-200">
       {/* Navigation Sidebar */}
@@ -311,21 +363,22 @@ export const InvoicesPage: React.FC = () => {
 
         <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
           {/* Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
-                <Receipt className="w-4 h-4" />
-                <span>Invoice Billing Management</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <Receipt className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Invoices & Billing
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Issue, track, and manage customer billing invoices and payment collections.
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Invoices & Billing
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Issue, track, and manage customer billing invoices and payment collections.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
@@ -336,6 +389,16 @@ export const InvoicesPage: React.FC = () => {
               >
                 <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-slate-500 dark:text-slate-400 ${isLoading ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                className="h-9 px-3.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-xs"
+                title="Export CSV"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5 text-[#F97316]" />
+                <span>Export CSV</span>
               </Button>
               <Button
                 onClick={() => setIsCreateModalOpen(true)}

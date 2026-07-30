@@ -35,6 +35,7 @@ import {
   Clock,
   CheckCircle2,
   Receipt,
+  Download,
 } from "lucide-react";
 import { DocumentPreviewModal } from "../../../components/common/DocumentPreviewModal";
 import { SendEmailModal } from "../../../components/common/SendEmailModal";
@@ -281,6 +282,54 @@ export const PaymentsPage: React.FC = () => {
     }).format(val);
   };
 
+  const handleExportCSV = () => {
+    if (!paymentsList.length) {
+      toast.error("Export Error", { description: "No payment records available to export." });
+      return;
+    }
+
+    const headers = [
+      "Receipt Number",
+      "Invoice Number",
+      "Client Name",
+      "Payment Date",
+      "Payment Method",
+      "Amount",
+      "Status",
+      "Reference Number",
+    ];
+
+    const rows = paymentsList.map((p) => {
+      const clientName =
+        p.invoice?.client?.companyName ||
+        p.invoice?.client?.contactPerson ||
+        "N/A";
+      const invoiceNumber = p.invoice?.number || "N/A";
+      return [
+        `"REC-${p.id.slice(-6).toUpperCase()}"`,
+        `"${invoiceNumber.replace(/"/g, '""')}"`,
+        `"${clientName.replace(/"/g, '""')}"`,
+        p.paymentDate ? new Date(p.paymentDate).toISOString().slice(0, 10) : "",
+        `"${(p.paymentMethod || "").replace(/"/g, '""')}"`,
+        p.amount || 0,
+        `"${(p.status || "SUCCESS").replace(/"/g, '""')}"`,
+        `"${(p.referenceNumber || "").replace(/"/g, '""')}"`,
+      ];
+    });
+
+    const csvString = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Payments_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("CSV Exported", { description: "Payments exported successfully." });
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#090D16] text-[#111827] dark:text-[#F9FAFB] flex transition-colors duration-200">
       {/* Navigation Sidebar */}
@@ -303,21 +352,22 @@ export const PaymentsPage: React.FC = () => {
 
         <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto select-none">
           {/* Page Header Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
-                <CreditCard className="w-4 h-4" />
-                <span>Payment Settlement Center</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <CreditCard className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Payments & Collections
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Pay outstanding invoices with instant checkout, view transaction logs, and manage payment receipts.
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Payments & Collections
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Pay outstanding invoices with instant checkout, view transaction logs, and manage payment receipts.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
@@ -331,6 +381,16 @@ export const PaymentsPage: React.FC = () => {
               >
                 <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-slate-500 dark:text-slate-400 ${isFetchingPayments ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                className="h-9 px-3.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-xs"
+                title="Export CSV"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5 text-[#F97316]" />
+                <span>Export CSV</span>
               </Button>
             </div>
           </div>

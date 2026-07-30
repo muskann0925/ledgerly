@@ -33,7 +33,7 @@ import { SendEmailModal } from "../../../components/common/SendEmailModal";
 import { clientsApi } from "../api/clients.api";
 import { toast } from "sonner";
 import type { ClientFormValues } from "../validation/client.schema";
-import { UserPlus, Users, AlertCircle, RefreshCw } from "lucide-react";
+import { UserPlus, Users, AlertCircle, RefreshCw, Download, Building2, UserCheck, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePermission } from "../../../hooks/usePermission";
 
@@ -251,6 +251,43 @@ export const ClientsPage: React.FC = () => {
     await restoreMutation.mutateAsync(restoringClient.id);
   };
 
+  const clientsList = data?.clients || [];
+  const totalClientsCount = data?.pagination?.total ?? clientsList.length;
+  const businessClientsCount = clientsList.filter((c) => c.clientType === "BUSINESS").length;
+  const individualClientsCount = clientsList.filter((c) => c.clientType === "INDIVIDUAL").length;
+  const gstClientsCount = clientsList.filter((c) => !!c.gstNumber?.trim()).length;
+
+  const handleExportCSV = () => {
+    if (!clientsList.length) {
+      toast.error("Export Error", { description: "No client records available to export." });
+      return;
+    }
+    const headers = ["Company Name", "Contact Person", "Email", "Phone", "Client Type", "GSTIN", "PAN", "Status", "Created Date"];
+    const rows = clientsList.map((c) => [
+      `"${(c.companyName || "").replace(/"/g, '""')}"`,
+      `"${(c.contactPerson || "").replace(/"/g, '""')}"`,
+      `"${(c.email || "").replace(/"/g, '""')}"`,
+      `"${(c.phone || "").replace(/"/g, '""')}"`,
+      `"${(c.clientType || "").replace(/"/g, '""')}"`,
+      `"${(c.gstNumber || "").replace(/"/g, '""')}"`,
+      `"${(c.panNumber || "").replace(/"/g, '""')}"`,
+      `"${(c.status || "ACTIVE").replace(/"/g, '""')}"`,
+      new Date(c.createdAt).toISOString().slice(0, 10),
+    ]);
+
+    const csvString = [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Clients_Directory_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("CSV Exported", { description: "Client records downloaded to CSV." });
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#090D16] text-[#111827] dark:text-[#F9FAFB] flex transition-colors duration-200">
       {/* Navigation Sidebar */}
@@ -270,21 +307,22 @@ export const ClientsPage: React.FC = () => {
 
         <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
           {/* Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
-                <Users className="w-4 h-4" />
-                <span>Client Management Directory</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <Users className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Client Directory
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Manage corporate and individual billing accounts, GSTIN profiles, and contact details.
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Client Directory
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Manage corporate and individual billing accounts, GSTIN profiles, and contact details.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
@@ -296,6 +334,16 @@ export const ClientsPage: React.FC = () => {
                 <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-slate-500 dark:text-slate-400 ${isLoading ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                className="h-9 px-3.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-xs"
+                title="Export CSV"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5 text-[#F97316]" />
+                <span>Export CSV</span>
+              </Button>
               {permission.can("clients", "create") && (
                 <Button
                   onClick={() => setIsCreateModalOpen(true)}
@@ -305,6 +353,53 @@ export const ClientsPage: React.FC = () => {
                   <span>Add New Client</span>
                 </Button>
               )}
+            </div>
+          </div>
+
+          {/* 4 Summary KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 select-none">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-bold">
+                <span>Total Clients</span>
+                <Users className="w-4 h-4 text-[#F97316]" />
+              </div>
+              <p className="text-2xl font-black text-slate-900 dark:text-white">
+                {totalClientsCount}
+              </p>
+              <p className="text-[11px] text-slate-400">Total profiles registered</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-bold">
+                <span>Corporate Accounts</span>
+                <Building2 className="w-4 h-4 text-indigo-500" />
+              </div>
+              <p className="text-2xl font-black text-slate-900 dark:text-white">
+                {businessClientsCount}
+              </p>
+              <p className="text-[11px] text-slate-400">B2B Business entities</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-bold">
+                <span>Individual Clients</span>
+                <UserCheck className="w-4 h-4 text-emerald-500" />
+              </div>
+              <p className="text-2xl font-black text-slate-900 dark:text-white">
+                {individualClientsCount}
+              </p>
+              <p className="text-[11px] text-slate-400">Direct consumer profiles</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-bold">
+                <span>GST Registered</span>
+                <ShieldCheck className="w-4 h-4 text-blue-500" />
+              </div>
+              <p className="text-2xl font-black text-slate-900 dark:text-white">
+                {gstClientsCount}
+              </p>
+              <p className="text-[11px] text-slate-400">GSTIN verified accounts</p>
             </div>
           </div>
 

@@ -46,25 +46,23 @@ export const SettingsPage: React.FC = () => {
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
-                <Building2 className="w-4 h-4" />
-                <span>System Settings & Configuration</span>
-                {/* <span className="ml-1 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#F97316]">
-                  {userRole} Mode
-                </span> */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <Building2 className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Application Settings
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Centralized management for organization branding, invoice numbering and interface themes.
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Application Settings
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Centralized management for organization branding, invoice numbering and interface themes.
+                </p>
+              </div>
             </div>
 
             {!canEdit && (
-              <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs font-semibold border border-amber-200 dark:border-amber-900/40 shrink-0">
+              <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs font-semibold border border-amber-200 dark:border-amber-900/40 shrink-0 self-start sm:self-auto">
                 <ShieldCheck className="w-4 h-4 text-amber-500" />
                 <span>Read-Only View (Requires Owner or Admin Role)</span>
               </div>

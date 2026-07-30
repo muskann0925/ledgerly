@@ -169,22 +169,23 @@ export const DashboardPage: React.FC = () => {
         {/* Dashboard Content Container */}
         <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-[1600px] w-full mx-auto">
           {/* Welcome Header & Compact Quick Action Dropdown */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div>
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider mb-1">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Enterprise Billing Suite</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Welcome back, {user?.name || "Super Admin"}
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
-                Real-time database analytics for Ledgerly billing metrics, invoices, and financial health.
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Welcome back, {user?.name || "Super Admin"}
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Real-time database analytics for Ledgerly billing metrics, invoices, and financial health.
+                </p>
+              </div>
             </div>
 
             {/* Quick Actions Dropdown & Refresh Button */}
-            <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto flex-wrap">
               <button
                 onClick={handleRefresh}
                 disabled={isLoading}

@@ -44,6 +44,7 @@ import {
   Clock,
   RefreshCw,
   FileCheck,
+  Download,
 } from "lucide-react";
 import type { QuotationFormValues } from "../validation/quotation.schema";
 import { toast } from "sonner";
@@ -278,6 +279,50 @@ export const QuotationsPage: React.FC = () => {
     }).format(val);
   };
 
+  const handleExportCSV = () => {
+    if (!quotationsList.length) {
+      toast.error("Export Error", { description: "No quotation records available to export." });
+      return;
+    }
+
+    const headers = [
+      "Quotation Number",
+      "Client Name",
+      "Issue Date",
+      "Expiry Date",
+      "Subtotal",
+      "Tax Amount",
+      "Total Amount",
+      "Status",
+    ];
+
+    const rows = quotationsList.map((q) => {
+      const clientName = q.client?.companyName || q.client?.contactPerson || "N/A";
+      return [
+        `"${(q.quotationNumber || "").replace(/"/g, '""')}"`,
+        `"${clientName.replace(/"/g, '""')}"`,
+        q.issueDate ? new Date(q.issueDate).toISOString().slice(0, 10) : "",
+        q.expiryDate ? new Date(q.expiryDate).toISOString().slice(0, 10) : "",
+        q.subtotal || 0,
+        q.tax || 0,
+        q.total || 0,
+        `"${(q.status || "").replace(/"/g, '""')}"`,
+      ];
+    });
+
+    const csvString = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Quotations_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("CSV Exported", { description: "Quotations exported successfully." });
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#090D16] text-[#111827] dark:text-[#F9FAFB] flex transition-colors duration-200">
       {/* Navigation Sidebar */}
@@ -297,21 +342,22 @@ export const QuotationsPage: React.FC = () => {
 
         <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto select-none">
           {/* Page Header Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
-                <FileText className="w-4 h-4" />
-                <span>Quotations & Proposals Suite</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Quotations & Estimates
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Create formal price quotes, handle client approvals, and convert proposals to active invoices.
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Quotations & Estimates
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Create formal price quotes, handle client approvals, and convert proposals to active invoices.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
@@ -322,6 +368,16 @@ export const QuotationsPage: React.FC = () => {
               >
                 <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-slate-500 dark:text-slate-400 ${isFetching ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                className="h-9 px-3.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-xs"
+                title="Export CSV"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5 text-[#F97316]" />
+                <span>Export CSV</span>
               </Button>
 
               {permission.can("quotations", "create") && (

@@ -11,7 +11,6 @@ import { Sidebar } from "../../../components/layout/Sidebar";
 import { Header } from "../../../components/layout/Header";
 import { NotificationList } from "../components/NotificationList";
 import {
-  Search,
   CheckCheck,
   ChevronsLeft,
   ChevronLeft,
@@ -28,7 +27,6 @@ type FilterTab = "ALL" | "UNREAD" | "INVOICE" | "PAYMENT" | "QUOTATION" | "REMIN
 
 export const NotificationsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const limit = 10;
@@ -43,10 +41,6 @@ export const NotificationsPage: React.FC = () => {
       type?: NotificationType;
       entityType?: string;
     } = { page, limit };
-
-    if (searchQuery.trim()) {
-      params.search = searchQuery.trim();
-    }
 
     switch (activeTab) {
       case "UNREAD":
@@ -114,23 +108,26 @@ export const NotificationsPage: React.FC = () => {
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
-                <Clock className="w-4 h-4" />
-                <span>Activity Alerts</span>
-                {totalUnread > 0 && (
-                  <span className="ml-1 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#F97316]">
-                    {totalUnread} Unread
-                  </span>
-                )}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Notifications & Activity Log
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Real-time audit stream of invoice activities, customer views, payments, and automated system reminders.
-              </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    Notifications & Activity Log
+                  </h1>
+                  {totalUnread > 0 && (
+                    <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#F97316]">
+                      {totalUnread} Unread
+                    </span>
+                  )}
+                </div>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Real-time audit stream of invoice activities, customer views, payments, and automated system reminders.
+                </p>
+              </div>
             </div>
 
             {totalUnread > 0 && (
@@ -147,24 +144,9 @@ export const NotificationsPage: React.FC = () => {
           </div>
 
           {/* Controls Bar */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-xs space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1);
-                }}
-                placeholder="Search notifications by title, message, or reference..."
-                className="w-full text-xs pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-[#182235] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F97316]"
-              />
-            </div>
-
+          <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-3 sm:p-3.5 shadow-xs flex items-center gap-2.5 overflow-x-auto scrollbar-none w-full select-none">
             {/* Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            <div className="flex items-center gap-1.5 shrink-0">
               {filterTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;

@@ -117,24 +117,22 @@ export const UsersPage: React.FC = () => {
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
           {/* Top Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#111827] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
-                <UsersIcon className="w-4 h-4" />
-                <span>User & RBAC Access Management</span>
-                {/* <span className="ml-1 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#F97316]">
-                  {actorRole} Control
-                </span> */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#111827] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/20 text-[#F97316] flex items-center justify-center shrink-0">
+                <UsersIcon className="w-5 h-5" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                User Management & Access
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Manage organizational staff, role assignments, security permissions, and active login credentials.
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  User Management & Access
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate max-w-xl">
+                  Manage organizational staff, role assignments, security permissions, and active login credentials.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => {
@@ -208,61 +206,59 @@ export const UsersPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Search Bar & Filters Card */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              {/* Search */}
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={search}
+          {/* Search Bar & Filters Toolbar */}
+          <div className="flex items-center gap-2.5 bg-white dark:bg-[#111827] p-3 sm:p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-x-auto scrollbar-none w-full select-none">
+            {/* Search */}
+            <div className="relative w-64 sm:w-72 shrink-0">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search staff by name, email, phone..."
+                className="w-full text-xs pl-9 pr-3 h-9 rounded-xl bg-slate-50 dark:bg-[#182235] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+              />
+            </div>
+
+            {/* Filters */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-50 dark:bg-[#182235] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold shrink-0">
+                <Filter className="w-3.5 h-3.5 text-slate-400" />
+                <span>Role:</span>
+                <select
+                  value={roleFilter}
                   onChange={(e) => {
-                    setSearch(e.target.value);
+                    setRoleFilter(e.target.value);
                     setPage(1);
                   }}
-                  placeholder="Search staff by name, email, phone, or department..."
-                  className="w-full text-xs pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-[#182235] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F97316]"
-                />
+                  className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Roles</option>
+                  <option value="OWNER">Owner</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="SALES">Sales</option>
+                  <option value="FINANCE">Finance</option>
+                  <option value="VIEWER">Viewer</option>
+                </select>
               </div>
 
-              {/* Filters */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#182235] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold">
-                  <Filter className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Role:</span>
-                  <select
-                    value={roleFilter}
-                    onChange={(e) => {
-                      setRoleFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
-                  >
-                    <option value="ALL">All Roles</option>
-                    <option value="OWNER">Owner</option>
-                    <option value="ADMIN">Admin</option>
-                    <option value="SALES">Sales</option>
-                    <option value="FINANCE">Finance</option>
-                    <option value="VIEWER">Viewer</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#182235] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold">
-                  <span>Status:</span>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => {
-                      setStatusFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
-                  >
-                    <option value="ALL">All Statuses</option>
-                    <option value="ACTIVE">Active Only</option>
-                    <option value="INACTIVE">Inactive Only</option>
-                  </select>
-                </div>
+              <div className="flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-50 dark:bg-[#182235] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold shrink-0">
+                <span>Status:</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Statuses</option>
+                  <option value="ACTIVE">Active Only</option>
+                  <option value="INACTIVE">Inactive Only</option>
+                </select>
               </div>
             </div>
           </div>
