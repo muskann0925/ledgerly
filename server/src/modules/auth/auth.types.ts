@@ -62,3 +62,7 @@ export interface ResendOtpInput {
   mfaToken: string;
 }
 
+export interface RegistrationStatusResponse {
+  registrationAllowed: boolean;
+}
+

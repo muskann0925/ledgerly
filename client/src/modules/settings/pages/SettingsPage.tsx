@@ -51,15 +51,15 @@ export const SettingsPage: React.FC = () => {
               <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
                 <Building2 className="w-4 h-4" />
                 <span>System Settings & Configuration</span>
-                <span className="ml-1 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#F97316]">
+                {/* <span className="ml-1 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#F97316]">
                   {userRole} Mode
-                </span>
+                </span> */}
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Application Settings
               </h1>
               <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-                Centralized management for organization branding, invoice numbering, email templates, and interface themes.
+                Centralized management for organization branding, invoice numbering and interface themes.
               </p>
             </div>
 

@@ -48,7 +48,8 @@ const otpLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Existing routes
+// Registration & Authentication routes
+router.get("/registration-status", authController.getRegistrationStatus);
 router.post("/register", authLimiter, validate(registerSchema), authController.register);
 router.post("/login", authLimiter, validate(loginSchema), authController.login);
 router.get("/me", authenticate, authController.getMe);

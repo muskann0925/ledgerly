@@ -70,9 +70,11 @@ export const usePaymentsByInvoiceQuery = (invoiceId: string | null) => {
  */
 const invalidateRelatedQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
   queryClient.invalidateQueries({ queryKey: [PAYMENTS_QUERY_KEY] });
+  queryClient.invalidateQueries({ queryKey: [PAYMENTS_BY_INVOICE_QUERY_KEY] });
   queryClient.invalidateQueries({ queryKey: ["invoices"] });
   queryClient.invalidateQueries({ queryKey: ["invoice-details"] });
   queryClient.invalidateQueries({ queryKey: ["invoice-dashboard"] });
+  queryClient.invalidateQueries({ queryKey: ["dashboard"] });
   queryClient.invalidateQueries({ queryKey: ["clients"] });
 };
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { LoginPage } from "../modules/auth/pages/LoginPage";
+import { RegisterPage } from "../modules/auth/pages/RegisterPage";
 import { ForgotPasswordPage } from "../modules/auth/pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "../modules/auth/pages/ResetPasswordPage";
 import { OtpVerificationPage } from "../modules/auth/pages/OtpVerificationPage";
@@ -35,6 +36,7 @@ export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-otp" element={<OtpVerificationPage />} />

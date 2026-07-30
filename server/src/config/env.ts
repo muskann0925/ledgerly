@@ -34,6 +34,10 @@ const envSchema = z
       .optional()
       .default(false),
     SMTP_FROM: z.string().optional().default("MarTechAdda Ledgerly <crm.test@martechadda.com>"),
+    ENABLE_REGISTRATION: z
+      .union([z.boolean(), z.string().transform((val) => val.toLowerCase() === "true")])
+      .optional()
+      .default(false),
   })
   .transform((data) => {
     const accessSecret = data.JWT_ACCESS_SECRET || data.JWT_SECRET;

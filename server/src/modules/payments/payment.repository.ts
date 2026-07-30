@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import type { Prisma, PaymentMethod } from "@prisma/client";
+import { sequenceService } from "../../shared/services/sequence.service";
 import type {
   CreatePaymentDto,
   UpdatePaymentDto,
@@ -176,13 +177,17 @@ export class PaymentRepository {
     invoiceUpdate: { amountPaid: number; balanceDue: number; status: any }
   ) {
     return prisma.$transaction(async (tx) => {
+      // Generate unique payment sequence number
+      const paymentNumber = await sequenceService.generateNextNumber("PAYMENT", tx);
+      const referenceNumber = paymentData.referenceNumber?.trim() || paymentNumber;
+
       const payment = await tx.payment.create({
         data: {
           invoiceId: paymentData.invoiceId,
           amount: paymentData.amount,
           paymentDate: paymentData.paymentDate ? new Date(paymentData.paymentDate) : new Date(),
           paymentMethod: paymentData.paymentMethod,
-          referenceNumber: paymentData.referenceNumber || null,
+          referenceNumber,
           notes: paymentData.notes || null,
           createdBy: paymentData.createdBy || null,
           isDeleted: false,
@@ -195,8 +200,9 @@ export class PaymentRepository {
               status: true,
               currency: true,
               total: true,
+              clientId: true,
               client: {
-                select: { id: true, companyName: true },
+                select: { id: true, companyName: true, contactPerson: true },
               },
             },
           },
@@ -211,6 +217,17 @@ export class PaymentRepository {
           status: invoiceUpdate.status,
         },
       });
+
+      if (payment.invoice?.clientId) {
+        await tx.clientActivity.create({
+          data: {
+            clientId: payment.invoice.clientId,
+            action: "PAYMENT_RECEIVED",
+            description: `Recorded payment of ₹${paymentData.amount.toLocaleString("en-IN")} (Ref: ${referenceNumber}) for Invoice #${payment.invoice.number}`,
+            performedBy: paymentData.createdBy || "System",
+          },
+        });
+      }
 
       return payment;
     });

@@ -1,12 +1,33 @@
 import { apiClient } from "../../../lib/axios";
 import type { LoginFormData } from "../schemas/login.schema";
+import type { RegisterFormData } from "../schemas/register.schema";
 import type {
   ApiResponse,
   AuthResponseData,
   LoginResponseData,
   User,
   AuthTokens,
+  RegistrationStatusData,
 } from "../types/auth.types";
+
+export const getRegistrationStatusApi = async (): Promise<
+  ApiResponse<RegistrationStatusData>
+> => {
+  const response = await apiClient.get<ApiResponse<RegistrationStatusData>>(
+    "/auth/registration-status"
+  );
+  return response.data;
+};
+
+export const registerApi = async (
+  data: RegisterFormData
+): Promise<ApiResponse<AuthResponseData>> => {
+  const response = await apiClient.post<ApiResponse<AuthResponseData>>(
+    "/auth/register",
+    data
+  );
+  return response.data;
+};
 
 export const loginApi = async (
   credentials: LoginFormData

@@ -6,6 +6,21 @@ import { AppError } from "../../utils/AppError";
 export class AuthController {
   constructor(private readonly service: AuthService = authService) {}
 
+  getRegistrationStatus = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const data = await this.service.getRegistrationStatus();
+      res
+        .status(200)
+        .json(createApiResponse(true, "Registration status retrieved successfully", data));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   register = async (
     req: Request,
     res: Response,

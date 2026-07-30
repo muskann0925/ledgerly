@@ -122,9 +122,9 @@ export const UsersPage: React.FC = () => {
               <div className="flex items-center gap-2 text-[#F97316] text-xs font-bold uppercase tracking-wider">
                 <UsersIcon className="w-4 h-4" />
                 <span>User & RBAC Access Management</span>
-                <span className="ml-1 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#F97316]">
+                {/* <span className="ml-1 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#F97316]">
                   {actorRole} Control
-                </span>
+                </span> */}
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 User Management & Access

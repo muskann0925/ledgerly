@@ -65,6 +65,10 @@ export class PaymentService {
       throw AppError.notFound("Invoice not found or deleted");
     }
 
+    if (!invoice.client || (invoice.client as any).isDeleted) {
+      throw AppError.badRequest("Associated client not found or deleted");
+    }
+
     if (invoice.status === "CANCELLED" || invoice.status === "REFUNDED") {
       throw AppError.badRequest(
         `Cannot record payment for an invoice with status '${invoice.status}'`
@@ -81,6 +85,10 @@ export class PaymentService {
     );
     const remainingBalance =
       Math.round((netPayable - currentActiveSum) * 100) / 100;
+
+    if (invoice.status === "PAID" || remainingBalance <= 0) {
+      throw AppError.badRequest("Invoice is already fully paid");
+    }
 
     if (data.amount > remainingBalance) {
       throw AppError.badRequest(

@@ -97,7 +97,7 @@ export const NotificationsPage: React.FC = () => {
     { id: "INVOICE", label: "Invoices", icon: Receipt },
     { id: "PAYMENT", label: "Payments", icon: CreditCard },
     { id: "QUOTATION", label: "Quotations", icon: FileText },
-    { id: "REMINDER", label: "Reminders", icon: Clock },
+    // { id: "REMINDER", label: "Reminders", icon: Clock },
     { id: "OVERDUE", label: "Overdue", icon: AlertTriangle },
   ];
 

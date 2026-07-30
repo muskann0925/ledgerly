@@ -10,7 +10,7 @@ import type {
   MarkPaidPayload,
   MarkPartialPayload,
 } from "./invoice.types";
-import { InvoiceStatus, NotificationType } from "@prisma/client";
+import { InvoiceStatus, NotificationType, PaymentMethod } from "@prisma/client";
 import { notificationService } from "../notifications/notification.service";
 import { emailService } from "../../shared/email.service";
 import { AppError } from "../../utils/AppError";
@@ -21,6 +21,7 @@ import {
 } from "../../shared/utils/taxCalculator";
 
 import { auditLogService } from "../audit-logs/audit-log.service";
+import { paymentService } from "../payments/payment.service";
 
 export class InvoiceService {
   private taxRepository: TaxRepository;
@@ -417,10 +418,21 @@ export class InvoiceService {
     return { message: `Invoice ${existing.number} marked as viewed.` };
   }
 
+  private parsePaymentMethodEnum(method?: string): PaymentMethod {
+    if (!method) return PaymentMethod.CASH;
+    const upper = method.toUpperCase().replace(/\s+/g, "_");
+    if (upper in PaymentMethod) return upper as PaymentMethod;
+    if (upper.includes("RAZORPAY") || upper.includes("CARD")) return PaymentMethod.CREDIT_CARD;
+    if (upper.includes("BANK") || upper.includes("WIRE")) return PaymentMethod.BANK_TRANSFER;
+    if (upper.includes("UPI") || upper.includes("GPAY")) return PaymentMethod.UPI;
+    if (upper.includes("CHEQUE") || upper.includes("CHECK")) return PaymentMethod.CHEQUE;
+    return PaymentMethod.OTHER;
+  }
+
   /**
    * Mark invoice full payment
    */
-  async markPaid(id: string, payload: MarkPaidPayload) {
+  async markPaid(id: string, payload: MarkPaidPayload, createdBy?: string) {
     const existing = await this.repository.findById(id);
     if (!existing || existing.isDeleted) {
       throw AppError.notFound("Invoice not found");
@@ -431,23 +443,25 @@ export class InvoiceService {
     }
 
     const paymentAmount = existing.balanceDue;
-    const newAmountPaid = existing.netPayable || existing.total;
-    const newBalanceDue = 0;
+    const paymentMethod = this.parsePaymentMethodEnum(payload.paymentMethod);
 
-    return this.repository.addPayment(
-      id,
-      paymentAmount,
-      payload.paymentMethod || "OTHER",
-      newAmountPaid,
-      newBalanceDue,
-      "PAID"
+    await paymentService.createPayment(
+      {
+        invoiceId: id,
+        amount: paymentAmount,
+        paymentMethod,
+        notes: payload.notes || "Full Payment Recorded",
+      },
+      createdBy
     );
+
+    return this.repository.findById(id);
   }
 
   /**
    * Mark partial payment
    */
-  async markPartial(id: string, payload: MarkPartialPayload) {
+  async markPartial(id: string, payload: MarkPartialPayload, createdBy?: string) {
     const existing = await this.repository.findById(id);
     if (!existing || existing.isDeleted) {
       throw AppError.notFound("Invoice not found");
@@ -463,19 +477,19 @@ export class InvoiceService {
       );
     }
 
-    const newAmountPaid = Math.round((existing.amountPaid + payload.amount) * 100) / 100;
-    const netPayable = existing.netPayable || existing.total;
-    const newBalanceDue = Math.round((netPayable - newAmountPaid) * 100) / 100;
-    const newStatus: InvoiceStatus = newBalanceDue <= 0 ? "PAID" : "PARTIALLY_PAID";
+    const paymentMethod = this.parsePaymentMethodEnum(payload.paymentMethod);
 
-    return this.repository.addPayment(
-      id,
-      payload.amount,
-      payload.paymentMethod || "OTHER",
-      newAmountPaid,
-      newBalanceDue,
-      newStatus
+    await paymentService.createPayment(
+      {
+        invoiceId: id,
+        amount: payload.amount,
+        paymentMethod,
+        notes: payload.notes || "Partial Payment Recorded",
+      },
+      createdBy
     );
+
+    return this.repository.findById(id);
   }
 
   /**

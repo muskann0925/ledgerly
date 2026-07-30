@@ -166,7 +166,8 @@ export class InvoiceController {
     try {
       const id = this.getParamId(req);
       const validatedData = markPaidSchema.parse(req.body);
-      const paidInvoice = await this.service.markPaid(id, validatedData);
+      const createdBy = (req as any).user?.name || (req as any).user?.email;
+      const paidInvoice = await this.service.markPaid(id, validatedData, createdBy);
       res
         .status(200)
         .json(createApiResponse(true, "Invoice marked as fully paid", paidInvoice));
@@ -183,7 +184,8 @@ export class InvoiceController {
     try {
       const id = this.getParamId(req);
       const validatedData = markPartialSchema.parse(req.body);
-      const updatedInvoice = await this.service.markPartial(id, validatedData);
+      const createdBy = (req as any).user?.name || (req as any).user?.email;
+      const updatedInvoice = await this.service.markPartial(id, validatedData, createdBy);
       res
         .status(200)
         .json(createApiResponse(true, "Partial payment recorded successfully", updatedInvoice));

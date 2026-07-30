@@ -184,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
           <div className="flex items-center gap-2">
             <HelpCircle className="w-3.5 h-3.5" />
-            <span className="font-medium text-[11px]">v2.4 · Enterprise</span>
+            <span className="font-medium text-[11px]">v0.1 · Foundation build</span>
           </div>
           <span className="w-2 h-2 rounded-full bg-emerald-500" title="System Operational" />
         </div>

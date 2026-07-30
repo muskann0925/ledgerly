@@ -8,7 +8,11 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 
-export const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  initialEmail?: string;
+}
+
+export const LoginForm: React.FC<LoginFormProps> = ({ initialEmail = "" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, errorMessage, clearError } = useLogin();
 
@@ -19,7 +23,7 @@ export const LoginForm: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email: initialEmail,
       password: "",
     },
   });
@@ -32,15 +36,15 @@ export const LoginForm: React.FC = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
       {/* Global Backend Error Banner */}
       {errorMessage && (
-        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm animate-fade-in">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" />
+        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300 text-sm animate-fade-in">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
           <div className="flex-1">
             <p className="font-medium text-xs sm:text-sm">{errorMessage}</p>
           </div>
           <button
             type="button"
             onClick={clearError}
-            className="text-red-500 hover:text-red-700 font-bold ml-auto text-xs"
+            className="text-red-500 hover:text-red-700 dark:hover:text-red-300 font-bold ml-auto text-xs"
           >
             ✕
           </button>
@@ -51,12 +55,12 @@ export const LoginForm: React.FC = () => {
       <div className="space-y-1.5">
         <label
           htmlFor="email"
-          className="block text-xs font-semibold uppercase tracking-wider text-slate-600"
+          className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400"
         >
           Email Address
         </label>
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
             <Mail className="h-4 w-4" />
           </div>
           <Input
@@ -69,7 +73,7 @@ export const LoginForm: React.FC = () => {
           />
         </div>
         {errors.email && (
-          <p className="text-xs text-red-600 font-medium mt-1">
+          <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1">
             {errors.email.message}
           </p>
         )}
@@ -80,7 +84,7 @@ export const LoginForm: React.FC = () => {
         <div className="flex items-center justify-between">
           <label
             htmlFor="password"
-            className="block text-xs font-semibold uppercase tracking-wider text-slate-600"
+            className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400"
           >
             Password
           </label>
@@ -92,7 +96,7 @@ export const LoginForm: React.FC = () => {
           </Link>
         </div>
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
             <Lock className="h-4 w-4" />
           </div>
           <Input
@@ -107,7 +111,7 @@ export const LoginForm: React.FC = () => {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none"
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -117,7 +121,7 @@ export const LoginForm: React.FC = () => {
           </button>
         </div>
         {errors.password && (
-          <p className="text-xs text-red-600 font-medium mt-1">
+          <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1">
             {errors.password.message}
           </p>
         )}
@@ -127,7 +131,7 @@ export const LoginForm: React.FC = () => {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full h-11 bg-[#FF5400] hover:bg-[#EA4D00] text-white font-semibold text-sm rounded-xl shadow-md shadow-orange-500/20"
+        className="w-full h-11 bg-[#FF5400] hover:bg-[#EA4D00] text-white font-semibold text-sm rounded-xl shadow-md shadow-orange-500/20 transition-all mt-2"
       >
         {isLoading ? (
           <>

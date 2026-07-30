@@ -51,7 +51,7 @@ export const InvoicePaymentDialog: React.FC<InvoicePaymentDialogProps> = ({
   const fullForm = useForm<MarkPaidFormValues>({
     resolver: zodResolver(markPaidFormSchema),
     defaultValues: {
-      paymentMethod: "Razorpay",
+      paymentMethod: "CASH",
       notes: "",
     },
   });
@@ -61,7 +61,7 @@ export const InvoicePaymentDialog: React.FC<InvoicePaymentDialogProps> = ({
     resolver: zodResolver(markPartialFormSchema),
     defaultValues: {
       amount: invoice?.balanceDue || 0,
-      paymentMethod: "Razorpay",
+      paymentMethod: "CASH",
       notes: "",
     },
   });
@@ -70,7 +70,7 @@ export const InvoicePaymentDialog: React.FC<InvoicePaymentDialogProps> = ({
     if (invoice && mode === "PARTIAL") {
       partialForm.reset({
         amount: invoice.balanceDue,
-        paymentMethod: "Razorpay",
+        paymentMethod: "CASH",
         notes: "",
       });
     }
@@ -145,12 +145,13 @@ export const InvoicePaymentDialog: React.FC<InvoicePaymentDialogProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Razorpay">Razorpay Gateway</SelectItem>
-                  <SelectItem value="Bank Transfer">Bank Wire Transfer (NEFT/IMPS)</SelectItem>
+                  <SelectItem value="CASH">Cash</SelectItem>
                   <SelectItem value="UPI">UPI / GPay / PhonePe</SelectItem>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Cheque">Cheque</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="BANK_TRANSFER">Bank Wire Transfer (NEFT/IMPS)</SelectItem>
+                  <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
+                  <SelectItem value="DEBIT_CARD">Debit Card</SelectItem>
+                  <SelectItem value="CHEQUE">Cheque</SelectItem>
+                  <SelectItem value="OTHER">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -229,12 +230,13 @@ export const InvoicePaymentDialog: React.FC<InvoicePaymentDialogProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Razorpay">Razorpay Gateway</SelectItem>
-                  <SelectItem value="Bank Transfer">Bank Wire Transfer (NEFT/IMPS)</SelectItem>
+                  <SelectItem value="CASH">Cash</SelectItem>
                   <SelectItem value="UPI">UPI / GPay / PhonePe</SelectItem>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Cheque">Cheque</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="BANK_TRANSFER">Bank Wire Transfer (NEFT/IMPS)</SelectItem>
+                  <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
+                  <SelectItem value="DEBIT_CARD">Debit Card</SelectItem>
+                  <SelectItem value="CHEQUE">Cheque</SelectItem>
+                  <SelectItem value="OTHER">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>

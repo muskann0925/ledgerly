@@ -14,6 +14,10 @@ export class AuthRepository {
     });
   }
 
+  async countUsers(): Promise<number> {
+    return prisma.user.count();
+  }
+
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return prisma.user.create({
       data,

@@ -33,7 +33,7 @@ import {
 import { emailService } from "../../shared/email.service";
 import { env } from "../../config/env";
 import { AppError } from "../../utils/AppError";
-import { User } from "@prisma/client";
+import { User, Role } from "@prisma/client";
 import { auditLogService } from "../audit-logs/audit-log.service";
 
 export class AuthService {
@@ -58,11 +58,24 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  async getRegistrationStatus(): Promise<{ registrationAllowed: boolean }> {
+    if (env.ENABLE_REGISTRATION) {
+      return { registrationAllowed: true };
+    }
+    const userCount = await this.repository.countUsers();
+    return { registrationAllowed: userCount === 0 };
+  }
+
   async register(
     input: RegisterInput,
     ipAddress?: string,
     userAgent?: string
   ): Promise<AuthResponseData> {
+    const userCount = await this.repository.countUsers();
+    if (!env.ENABLE_REGISTRATION && userCount > 0) {
+      throw AppError.forbidden("Registration is disabled. Contact the administrator.");
+    }
+
     const existingUser = await this.repository.findByEmail(input.email.toLowerCase().trim());
     if (existingUser) {
       throw AppError.conflict("User with this email already exists");
@@ -79,7 +92,8 @@ export class AuthService {
       name: input.name,
       email: input.email.toLowerCase().trim(),
       password: hashedPassword,
-      role: input.role,
+      role: Role.OWNER,
+      isActive: true,
     });
 
     const tokens = this.generateUserTokens(user);
@@ -95,7 +109,7 @@ export class AuthService {
       entityType: "User",
       entityId: user.id,
       entityName: user.name,
-      description: `Registered new account '${user.name}' (${user.email})`,
+      description: `Registered initial Owner account '${user.name}' (${user.email})`,
       ipAddress,
       userAgent,
       status: "SUCCESS",

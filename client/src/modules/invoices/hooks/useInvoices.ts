@@ -206,6 +206,9 @@ export const useMarkPaidMutation = (onSuccessCallback?: () => void) => {
       queryClient.invalidateQueries({ queryKey: [INVOICES_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [INVOICE_DETAILS_QUERY_KEY, data.id] });
       queryClient.invalidateQueries({ queryKey: [INVOICE_DASHBOARD_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast.success(`Invoice ${data.number} marked as fully paid`);
       if (onSuccessCallback) onSuccessCallback();
     },
@@ -228,6 +231,9 @@ export const useMarkPartialMutation = (onSuccessCallback?: () => void) => {
       queryClient.invalidateQueries({ queryKey: [INVOICES_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [INVOICE_DETAILS_QUERY_KEY, data.id] });
       queryClient.invalidateQueries({ queryKey: [INVOICE_DASHBOARD_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast.success(`Partial payment recorded for ${data.number}`);
       if (onSuccessCallback) onSuccessCallback();
     },
